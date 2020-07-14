@@ -7,6 +7,8 @@ public class Friend : MonoBehaviour
     public float moveSpeed = 2;
     public float minDistance = 0;
     public float maxDistance = 0;
+    Animator animator;
+
     Vector3 kitchen;
     GameObject[] doors;
     float distance;
@@ -20,6 +22,7 @@ public class Friend : MonoBehaviour
     {
         kitchen = GameObject.FindGameObjectWithTag("Kitchen").transform.position;
         doors = GameObject.FindGameObjectsWithTag("Door");
+        animator = GetComponent<Animator>();
         
     }
 
@@ -30,16 +33,17 @@ public class Friend : MonoBehaviour
         distance = Vector3.Distance(currentPosition ,kitchen);
         
         
-        if(!enteredDoor){
-            target = FindClosestDoor();
+        if(enteredDoor){
+            target = kitchen;
+            //Debug.Log("Distance: " + distance + " Current Position: " + currentPosition  + " Target Postition: " + target);
+        } 
+        else {
             if(target == currentPosition){
                 enteredDoor = true;
                 Debug.Log("Entred Door!");
-            }
-        } 
-        else {
-            target = kitchen;
-            //Debug.Log("Distance: " + distance + " Current Position: " + currentPosition  + " Target Postition: " + target);
+            } else{
+                target = FindClosestDoor();
+            }            
         }
 
         Debug.Log("Distance: " + distance + " Current Position: " + currentPosition  + " Target Postition: " + target);
@@ -47,16 +51,19 @@ public class Friend : MonoBehaviour
         if(Vector3.Distance(transform.position,target) >= minDistance){
             //transform.position += transform.forward * moveSpeed * Time.deltaTime;
             transform.position = Vector3.MoveTowards(currentPosition,target, moveSpeed * Time.deltaTime);
+            isWalking();
+        }
+        else{
+            isWalking(false);
         }
 
         
     }
 
     Vector3 FindClosestDoor(){
-        Vector3 bestDoor = new Vector3(Mathf.Infinity,Mathf.Infinity,Mathf.Infinity);
+        Vector3 bestDoor = Vector3.positiveInfinity;
         float distance;
         float disToBest;
-
         
         foreach(GameObject door in doors){
             distance = Vector3.Distance(currentPosition,door.transform.position);
@@ -66,7 +73,10 @@ public class Friend : MonoBehaviour
             }
             
         }
-
         return bestDoor;
+    }
+
+    void isWalking(bool val = true){
+        animator.SetBool("isWalking",val);
     }
 }
